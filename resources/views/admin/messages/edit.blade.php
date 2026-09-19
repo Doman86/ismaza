@@ -36,7 +36,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                <a href="{{ route('admin.messages.index') }}" class=" btn btn-ghost">Batal</a>
+                <a href="{{ route('admin.messages.index') }}" class="btn btn-ghost">Batal</a>
             </div>
         </form>
     </div>

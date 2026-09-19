@@ -107,7 +107,7 @@
         var DPR = Math.min(window.devicePixelRatio || 1, 2);
         var W, H, hearts = [];
         var COUNT = window.innerWidth < 720 ? 12 : 20;
-        var COLORS = ['rgba(201,138,146,', 'rgba(212,175,122,', 'rgba(169,95,106,'];
+        var COLORS = ['rgba(201,143,150,', 'rgba(239,212,137,', 'rgba(156,175,136,'];
 
         function resize() {
             W = canvas.width = window.innerWidth * DPR;
