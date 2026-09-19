@@ -20,6 +20,72 @@ jobs:
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
+
           script: |
             cd /home/u519141514/domains/ismaza.my.id/public_html
+
+            echo "=== UPDATE SOURCE CODE ==="
+
+            git checkout main
             git pull origin main
+
+            echo "=== CREATE ROOT INDEX ==="
+
+            cat > index.php <<'EOF'
+            <?php
+
+            use Illuminate\Foundation\Application;
+            use Illuminate\Http\Request;
+
+            define('LARAVEL_START', microtime(true));
+
+            if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
+                require $maintenance;
+            }
+
+            require __DIR__.'/vendor/autoload.php';
+
+            $app = require_once __DIR__.'/bootstrap/app.php';
+
+            $app->handleRequest(Request::capture());
+            EOF
+
+            echo "=== CREATE ROOT HTACCESS ==="
+
+            cat > .htaccess <<'EOF'
+            <IfModule mod_rewrite.c>
+                <IfModule mod_negotiation.c>
+                    Options -MultiViews -Indexes
+                </IfModule>
+
+                RewriteEngine On
+
+                RewriteCond %{HTTP:Authorization} .
+                RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+                RewriteCond %{HTTP:x-xsrf-token} .
+                RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+                RewriteCond %{REQUEST_FILENAME} !-d
+                RewriteCond %{REQUEST_URI} (.+)/$
+                RewriteRule ^ %1 [L,R=301]
+
+                RewriteCond %{REQUEST_FILENAME} !-d
+                RewriteCond %{REQUEST_FILENAME} !-f
+                RewriteRule ^ index.php [L]
+            </IfModule>
+            EOF
+
+            chmod 644 index.php .htaccess
+
+            echo "=== CLEAR LARAVEL CACHE ==="
+
+            php artisan optimize:clear
+
+            echo "=== FINAL CHECK ==="
+
+            git branch --show-current
+            git status --short
+            ls -la index.php .htaccess
+
+            echo "=== DEPLOYMENT SUCCESS ==="
